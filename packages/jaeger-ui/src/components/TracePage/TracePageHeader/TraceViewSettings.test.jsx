@@ -97,6 +97,38 @@ describe('<TraceViewSettings>', () => {
     });
   });
 
+  describe('Service Instance Colors', () => {
+    beforeEach(() => {
+      useDisplayedLayoutStore.setState({ instanceColorsEnabled: false });
+    });
+
+    function instanceColorsItem() {
+      return screen.getByText('Service Instance Colors').closest('[role="menuitem"]');
+    }
+
+    it('shows the item, unchecked while instance colors are off', async () => {
+      render(<TraceViewSettings {...defaultProps} />);
+      await userEvent.click(screen.getByRole('button', { name: /trace view settings/i }));
+      await screen.findByText('Service Instance Colors');
+      expect(instanceColorsItem().querySelector('svg')).toBeNull();
+    });
+
+    it('shows a checkmark while instance colors are on', async () => {
+      useDisplayedLayoutStore.setState({ instanceColorsEnabled: true });
+      render(<TraceViewSettings {...defaultProps} />);
+      await userEvent.click(screen.getByRole('button', { name: /trace view settings/i }));
+      await screen.findByText('Service Instance Colors');
+      expect(instanceColorsItem().querySelector('svg')).not.toBeNull();
+    });
+
+    it('toggles the instance colors preference when clicked', async () => {
+      render(<TraceViewSettings {...defaultProps} />);
+      await userEvent.click(screen.getByRole('button', { name: /trace view settings/i }));
+      await userEvent.click(await screen.findByText('Service Instance Colors'));
+      expect(useDisplayedLayoutStore.getState().instanceColorsEnabled).toBe(true);
+    });
+  });
+
   it('always shows "Keyboard Shortcuts" in the dropdown', async () => {
     render(<TraceViewSettings {...defaultProps} />);
     await userEvent.click(screen.getByRole('button', { name: /trace view settings/i }));

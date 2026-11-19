@@ -11,6 +11,7 @@ import SpanDetailRow from './SpanDetailRow';
 
 import { makeCriticalPathContext } from './criticalPath';
 import { RECORDED_TREE } from './generateRowStates';
+import { getInstanceColor } from './instanceColors';
 import { EMPTY_SPAN_FILTER, evaluateSpanFilter, withHiddenServices } from '../spanFilter';
 import { useTraceTimelineStore } from './store';
 import * as track from './store.track';
@@ -825,6 +826,19 @@ describe('<VirtualizedTraceViewImpl>', () => {
       });
 
       expect(mockListViewInstance.forceUpdate).toHaveBeenCalled();
+    });
+  });
+
+  describe('service instance colors', () => {
+    it('gives a span bar the color of its instance and leaves other bars alone', () => {
+      const instanceIndexes = new Map([[trace.spans[1].spanID, 1]]);
+      render(<VirtualizedTraceViewImpl {...mockProps} instanceIndexes={instanceIndexes} />);
+      const { itemRenderer } = listViewPropsCapture.current;
+
+      const withInstance = itemRenderer('bar', {}, 1, {}).props.children.props;
+      expect(withInstance.instanceColor).toBe(getInstanceColor(1, withInstance.color));
+      expect(withInstance.instanceColor).not.toBe(withInstance.color);
+      expect(itemRenderer('bar', {}, 0, {}).props.children.props.instanceColor).toBeUndefined();
     });
   });
 

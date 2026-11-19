@@ -23,6 +23,7 @@ import {
 import SpanDetailSidePanel from './SpanDetailSidePanel';
 import TimelineHeaderRow from './TimelineHeaderRow';
 import { collapseTargets } from './generateRowStates';
+import { computeInstanceIndexes } from './instanceColors';
 import { evaluateSpanFilter } from '../spanFilter';
 import { useSpanPillsEnabled } from './spanPills';
 import VirtualizedTraceView from './VirtualizedTraceView';
@@ -59,6 +60,7 @@ const NUM_TICKS = 5;
 
 // Stable reference so the heatmap-disabled case doesn't force a new Map identity on every render.
 const EMPTY_SCORES: Map<string, number> = new Map();
+const EMPTY_INSTANCE_INDEXES: Map<string, number> = new Map();
 
 /**
  * `TraceTimelineViewer` now renders the header row because it is sensitive to
@@ -85,6 +87,7 @@ export const TraceTimelineViewerImpl = (props: TProps) => {
   const spanNameColumnWidth = useDisplayedLayoutStore(s => s.spanNameColumnWidth);
   const timelineBarsVisible = useDisplayedLayoutStore(s => s.timelineBarsVisible);
   const heatmapEnabled = useDisplayedLayoutStore(s => s.heatmapEnabled);
+  const instanceColorsEnabled = useDisplayedLayoutStore(s => s.instanceColorsEnabled);
   const zustandSetSpanNameColumnWidth = useDisplayedLayoutStore(s => s.setSpanNameColumnWidth);
   const zustandSetSidePanelWidth = useDisplayedLayoutStore(s => s.setSidePanelWidth);
 
@@ -94,6 +97,11 @@ export const TraceTimelineViewerImpl = (props: TProps) => {
   const heatmapScores = useMemo(
     () => (heatmapEnabled ? computeLatencyScores(trace.spans) : EMPTY_SCORES),
     [heatmapEnabled, trace.spans]
+  );
+
+  const instanceIndexes = useMemo(
+    () => (instanceColorsEnabled ? computeInstanceIndexes(trace.spans) : EMPTY_INSTANCE_INDEXES),
+    [instanceColorsEnabled, trace.spans]
   );
 
   const detailStates = useTraceTimelineStore(s => s.detailStates);
@@ -256,6 +264,7 @@ export const TraceTimelineViewerImpl = (props: TProps) => {
       nameColumnWidth={nameColumnWidth}
       heatmapEnabled={heatmapEnabled}
       heatmapScores={heatmapScores}
+      instanceIndexes={instanceIndexes}
       listTopOffsetKey={listTopOffsetKey}
       spanPillsEnabled={spanPillsEnabled}
     />

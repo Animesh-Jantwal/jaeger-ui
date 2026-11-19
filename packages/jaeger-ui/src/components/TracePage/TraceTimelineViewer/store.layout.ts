@@ -36,6 +36,7 @@ type LayoutSettings = {
   detailPanelMode: SpanDetailPanelMode;
   timelineBarsVisible: boolean;
   heatmapEnabled: boolean;
+  instanceColorsEnabled: boolean;
 };
 
 export type LayoutUpdateOptions = {
@@ -50,6 +51,7 @@ type DisplayedLayoutStore = LayoutSettings & {
   applyDetailPanelModeToLayout: (mode: SpanDetailPanelMode, options?: LayoutUpdateOptions) => void;
   setTimelineBarsVisible: (visible: boolean, options?: LayoutUpdateOptions) => void;
   toggleHeatmap: () => void;
+  toggleInstanceColors: () => void;
 };
 
 // Single namespaced localStorage key holding the JSON-serialized prefs (replaces the four raw keys).
@@ -149,8 +151,16 @@ function normalizeLayoutPrefs(stored: Partial<LayoutSettings>): LayoutSettings {
   }
 
   const heatmapEnabled = stored.heatmapEnabled ?? false;
+  const instanceColorsEnabled = stored.instanceColorsEnabled ?? false;
 
-  return { spanNameColumnWidth, sidePanelWidth, detailPanelMode, timelineBarsVisible, heatmapEnabled };
+  return {
+    spanNameColumnWidth,
+    sidePanelWidth,
+    detailPanelMode,
+    timelineBarsVisible,
+    heatmapEnabled,
+    instanceColorsEnabled,
+  };
 }
 
 // Storage is untrusted input. Copy only valid preference values, never actions or other store fields.
@@ -172,6 +182,9 @@ function readLayoutPrefs(value: unknown): Partial<LayoutSettings> {
   }
   if (typeof stored.heatmapEnabled === 'boolean') {
     prefs.heatmapEnabled = stored.heatmapEnabled;
+  }
+  if (typeof stored.instanceColorsEnabled === 'boolean') {
+    prefs.instanceColorsEnabled = stored.instanceColorsEnabled;
   }
   return prefs;
 }
@@ -270,6 +283,12 @@ export const useDisplayedLayoutStore = create<DisplayedLayoutStore>()((set, get)
     const heatmapEnabled = !get().heatmapEnabled;
     useSavedLayoutPrefsStore.setState({ heatmapEnabled });
     set({ heatmapEnabled });
+  },
+
+  toggleInstanceColors: () => {
+    const instanceColorsEnabled = !get().instanceColorsEnabled;
+    useSavedLayoutPrefsStore.setState({ instanceColorsEnabled });
+    set({ instanceColorsEnabled });
   },
 }));
 

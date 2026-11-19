@@ -165,6 +165,15 @@ describe('layout preference hydration', () => {
     expect((await rehydrateLayoutPrefs()).heatmapEnabled).toBe(true);
   });
 
+  it('reads instanceColorsEnabled from localStorage and defaults it to false', async () => {
+    expect((await rehydrateLayoutPrefs()).instanceColorsEnabled).toBe(false);
+    localStorage.setItem(
+      'jaeger.layout',
+      JSON.stringify({ state: { instanceColorsEnabled: true }, version: 1 })
+    );
+    expect((await rehydrateLayoutPrefs()).instanceColorsEnabled).toBe(true);
+  });
+
   it('defaults detailPanelMode to inline when enableSidePanel is false', async () => {
     localStorage.setItem('detailPanelMode', 'sidepanel');
     vi.mocked(getConfig).mockReturnValue({
@@ -419,6 +428,7 @@ describe('useSavedLayoutPrefsStore persistence (legacy migration + corrupted val
           detailPanelMode: 'unknown',
           timelineBarsVisible: 'false',
           heatmapEnabled: 'true',
+          instanceColorsEnabled: 'true',
           setSpanNameColumnWidth: 'not a function',
         },
         version: 1,
@@ -431,6 +441,7 @@ describe('useSavedLayoutPrefsStore persistence (legacy migration + corrupted val
       detailPanelMode: 'inline',
       timelineBarsVisible: true,
       heatmapEnabled: false,
+      instanceColorsEnabled: false,
     });
     expect(useDisplayedLayoutStore.getState().setSpanNameColumnWidth).toBeTypeOf('function');
   });
@@ -703,6 +714,19 @@ describe('trace timeline zustand stores', () => {
         useDisplayedLayoutStore.getState().applyDetailPanelModeToLayout('sidepanel', { persist: false });
         useDisplayedLayoutStore.getState().toggleHeatmap();
         expect(JSON.parse(localStorage.getItem('jaeger.layout')!).state).toEqual({ heatmapEnabled: true });
+      });
+    });
+
+    describe('toggleInstanceColors', () => {
+      it('flips instanceColorsEnabled and persists it to localStorage', () => {
+        useDisplayedLayoutStore.setState({ instanceColorsEnabled: false });
+        useDisplayedLayoutStore.getState().toggleInstanceColors();
+        expect(useDisplayedLayoutStore.getState().instanceColorsEnabled).toBe(true);
+        expect(JSON.parse(localStorage.getItem('jaeger.layout')!).state.instanceColorsEnabled).toBe(true);
+
+        useDisplayedLayoutStore.getState().toggleInstanceColors();
+        expect(useDisplayedLayoutStore.getState().instanceColorsEnabled).toBe(false);
+        expect(JSON.parse(localStorage.getItem('jaeger.layout')!).state.instanceColorsEnabled).toBe(false);
       });
     });
   });

@@ -10,6 +10,7 @@ import memoizeOne from 'memoize-one';
 import type { Location, NavigateFunction } from 'react-router-dom';
 import { makeCriticalPathContext } from './criticalPath';
 import generateRowStates, { RowState, RECORDED_TREE, VisibleTree } from './generateRowStates';
+import { getInstanceColor } from './instanceColors';
 import ListView, { ListViewRef } from './ListView';
 import PrunedSpanRow from './PrunedSpanRow';
 import SpanBarRow from './SpanBarRow';
@@ -69,6 +70,7 @@ type TVirtualizedTraceViewOwnProps = {
   heatmapEnabled?: boolean;
   // Latency score per spanID; spans missing from the map have no same-operation peers.
   heatmapScores?: Map<string, number>;
+  instanceIndexes?: Map<string, number>;
   // Changes when content above the list (the heatmap legend) moves it; see ListView.
   listTopOffsetKey?: unknown;
 };
@@ -427,6 +429,7 @@ export const VirtualizedTraceViewImpl = React.memo(function VirtualizedTraceView
         useOtelTerms,
         spanPillsEnabled,
         heatmapEnabled,
+        instanceIndexes,
       } = propsRef.current;
       // to avert flow error
       if (!trace) {
@@ -436,6 +439,8 @@ export const VirtualizedTraceViewImpl = React.memo(function VirtualizedTraceView
       const { spans } = trace;
 
       const color = getSpanColor(span);
+      const instanceIndex = instanceIndexes?.get(spanID);
+      const instanceColor = instanceIndex === undefined ? undefined : getInstanceColor(instanceIndex, color);
       const { tree } = getRowStateData();
       // A collapsed span whose children are all hidden draws no children, so its row is not drawn
       // as collapsed either.
@@ -483,6 +488,7 @@ export const VirtualizedTraceViewImpl = React.memo(function VirtualizedTraceView
           <SpanBarRow
             className={getClippingCssClasses()}
             color={color}
+            instanceColor={instanceColor}
             criticalPath={criticalPathSections}
             nameColumnWidth={nameColumnWidth}
             isChildrenExpanded={!isCollapsed}

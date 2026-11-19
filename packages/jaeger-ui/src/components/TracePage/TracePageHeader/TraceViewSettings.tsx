@@ -35,6 +35,8 @@ export default function TraceViewSettings(props: Props) {
 
   const heatmapEnabled = useDisplayedLayoutStore(s => s.heatmapEnabled);
   const toggleHeatmap = useDisplayedLayoutStore(s => s.toggleHeatmap);
+  const instanceColorsEnabled = useDisplayedLayoutStore(s => s.instanceColorsEnabled);
+  const toggleInstanceColors = useDisplayedLayoutStore(s => s.toggleInstanceColors);
 
   const [kbdModalVisible, setKbdModalVisible] = React.useState(false);
 
@@ -50,6 +52,12 @@ export default function TraceViewSettings(props: Props) {
       icon: heatmapEnabled ? <IoCheckmark style={CHECK_STYLE} /> : CHECK_PLACEHOLDER,
       label: 'Span Latency Heatmap',
       onClick: toggleHeatmap,
+    },
+    {
+      key: 'instance-colors',
+      icon: instanceColorsEnabled ? <IoCheckmark style={CHECK_STYLE} /> : CHECK_PLACEHOLDER,
+      label: 'Service Instance Colors',
+      onClick: toggleInstanceColors,
     },
   ];
 

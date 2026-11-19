@@ -16,6 +16,7 @@ import './SpanBar.css';
 
 type TSpanBarProps = {
   color: string;
+  instanceColor?: string;
   hintSide: string;
   // onClick: (evt: React.MouseEvent<any>) => void;
   onClick?: (evt: React.MouseEvent<any>) => void;
@@ -91,6 +92,7 @@ function SpanBar(props: TSpanBarProps) {
     viewStart,
     getViewedBounds,
     color,
+    instanceColor,
     hintSide,
     onClick,
     rpc,
@@ -131,7 +133,7 @@ function SpanBar(props: TSpanBarProps) {
         aria-label={label}
         className="SpanBar--bar"
         style={{
-          background: color,
+          background: instanceColor ? `linear-gradient(${color} 70%, ${instanceColor} 70%)` : color,
           left: toPercent(viewStart),
           width: toPercent(viewEnd - viewStart),
         }}

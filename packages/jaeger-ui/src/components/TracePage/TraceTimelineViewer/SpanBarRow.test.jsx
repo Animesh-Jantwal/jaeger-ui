@@ -158,6 +158,11 @@ describe('<SpanBarRow>', () => {
     expect(defaultProps.onChildrenToggled).toHaveBeenCalledWith(spanID);
   });
 
+  it('passes the instance color to the span bar', () => {
+    render(<SpanBarRow {...defaultProps} instanceColor="var(--span-color-5)" />);
+    expect(SpanBar.mock.lastCall[0].instanceColor).toBe('var(--span-color-5)');
+  });
+
   it('keeps the tree markers on the service color when the bar takes another color', () => {
     render(<SpanBarRow {...defaultProps} color="var(--heatmap-7)" />);
     expect(screen.getByTestId('span-tree-offset')).toHaveAttribute(

@@ -25,6 +25,7 @@ import './SpanBarRow.css';
 type SpanBarRowProps = {
   className?: string;
   color: string;
+  instanceColor?: string;
   criticalPath: CriticalPathSection[];
   nameColumnWidth: number;
   isChildrenExpanded: boolean;
@@ -96,6 +97,7 @@ export function SpanListTooltip({ heading, spans }: { heading: string; spans: Re
 const SpanBarRow: React.FC<SpanBarRowProps> = ({
   className = '',
   color,
+  instanceColor,
   criticalPath,
   nameColumnWidth,
   isChildrenExpanded,
@@ -296,6 +298,7 @@ const SpanBarRow: React.FC<SpanBarRowProps> = ({
             viewEnd={viewEnd}
             getViewedBounds={getViewedBounds}
             color={color}
+            instanceColor={instanceColor}
             shortLabel={label}
             longLabel={longLabel}
             hintSide={hintSide}

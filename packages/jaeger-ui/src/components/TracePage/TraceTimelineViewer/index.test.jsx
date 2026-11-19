@@ -35,6 +35,7 @@ const { mockDisplayedLayoutStore, mockTraceTimelineStore, mockUseTraceTimelineSt
       detailPanelMode: 'inline',
       timelineBarsVisible: true,
       heatmapEnabled: false,
+      instanceColorsEnabled: false,
       setSpanNameColumnWidth: vi.fn(),
       setSidePanelWidth: vi.fn(),
       setTimelineBarsVisible: vi.fn(),
@@ -62,9 +63,17 @@ const mockUseSpanPillsEnabled = vi.hoisted(() => vi.fn(() => true));
 vi.mock('./spanPills', () => ({
   useSpanPillsEnabled: mockUseSpanPillsEnabled,
 }));
+const mockComputeInstanceIndexes = vi.hoisted(() => vi.fn(() => new Map([['span-id', 1]])));
+vi.mock('./instanceColors', () => ({
+  computeInstanceIndexes: mockComputeInstanceIndexes,
+}));
 vi.mock('./VirtualizedTraceView', () =>
   mockDefault(props => (
-    <div data-testid="virtualized-trace-view-mock" data-list-top-offset-key={props.listTopOffsetKey} />
+    <div
+      data-testid="virtualized-trace-view-mock"
+      data-list-top-offset-key={props.listTopOffsetKey}
+      data-instance-indexes={JSON.stringify([...props.instanceIndexes])}
+    />
   ))
 );
 vi.mock('./SpanDetailSidePanel', () => mockDefault(() => <div data-testid="span-detail-side-panel-mock" />));
@@ -128,6 +137,8 @@ describe('<TraceTimelineViewer>', () => {
     mockDisplayedLayoutStore.detailPanelMode = 'inline';
     mockDisplayedLayoutStore.timelineBarsVisible = true;
     mockDisplayedLayoutStore.heatmapEnabled = false;
+    mockDisplayedLayoutStore.instanceColorsEnabled = false;
+    mockComputeInstanceIndexes.mockClear();
     mockTraceTimelineStore.detailStates = new Map();
     mockUseTraceTimelineStore.setState.mockClear();
     mockUseSpanPillsEnabled.mockClear();
@@ -203,6 +214,25 @@ describe('<TraceTimelineViewer>', () => {
     const withLegend = offsetKey();
     rerender(<TraceTimelineViewerImpl {...props} pageHeaderHeight={80} />);
     expect(offsetKey()).not.toBe(withLegend);
+  });
+
+  describe('service instance colors', () => {
+    it('gives the span list instance indexes only while instance colors are on', () => {
+      const { rerender } = render(<TraceTimelineViewerImpl {...props} />);
+      expect(mockComputeInstanceIndexes).not.toHaveBeenCalled();
+      expect(screen.getByTestId('virtualized-trace-view-mock')).toHaveAttribute(
+        'data-instance-indexes',
+        '[]'
+      );
+
+      mockDisplayedLayoutStore.instanceColorsEnabled = true;
+      rerender(<TraceTimelineViewerImpl {...props} />);
+      expect(mockComputeInstanceIndexes).toHaveBeenCalledWith(trace.spans);
+      expect(screen.getByTestId('virtualized-trace-view-mock')).toHaveAttribute(
+        'data-instance-indexes',
+        '[["span-id",1]]'
+      );
+    });
   });
 
   describe('latency heatmap', () => {

@@ -129,4 +129,16 @@ describe('<SpanBar>', () => {
       'A segment on the critical path of the overall trace/request/workflow.'
     );
   });
+
+  it('paints the bar in a single color without an instance color', () => {
+    render(<SpanBar {...props} />);
+    expect(screen.getByLabelText(shortLabel).style.background).toBe('rgb(255, 255, 255)');
+  });
+
+  it('adds a band in the instance color below the bar color', () => {
+    render(<SpanBar {...props} instanceColor="#000" />);
+    expect(screen.getByLabelText(shortLabel).style.background).toBe(
+      'linear-gradient(rgb(255, 255, 255) 70%, rgb(0, 0, 0) 70%)'
+    );
+  });
 });
